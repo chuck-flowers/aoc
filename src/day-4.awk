@@ -13,7 +13,7 @@ BEGIN {
 
 	print "line = " line ", first_pair = " array_to_string(first_pair) ", second_pair = " array_to_string(second_pair)
 
-	if (pair_contains_pair(first_pair, second_pair) || pair_contains_pair(second_pair, first_pair)) {
+	if (pair_overlaps_pair(first_pair, second_pair) || pair_overlaps_pair(second_pair, first_pair)) {
 		count += 1
 	}
 }
@@ -42,5 +42,19 @@ function pair_contains_pair(this, other) {
 	} else {
 		return 0
 	}
+}
+
+function pair_overlaps_pair(this, other) {
+	# First point is contained
+	if (this[1] <= other[1] && other[1] <= this[2]) {
+		return 1
+	}
+
+	# Second point is contained
+	if (this[1] <= other[2] && other[2] <=this[2]) {
+		return 1
+	}
+
+	return 0
 }
 
