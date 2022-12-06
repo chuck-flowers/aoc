@@ -57,6 +57,8 @@ BEGIN {
 	PRIORITY["X"] = 50
 	PRIORITY["Y"] = 51
 	PRIORITY["Z"] = 52
+
+	split("", group_set)
 }
 
 /[[:alpha:]]+/ {
@@ -64,22 +66,29 @@ BEGIN {
 	total_item_count = length(content)
 	compartment_item_count = total_item_count / 2
 
-	# Convert the first rucksack to an array
-	first_str = substr(content, 1, compartment_item_count)
-	split(first_str, first_array, "")
-	set_from_array(first_array, first_set)
+	# Convert the current line into a set of items
+	split(content, content_array, "")
+	set_from_array(content_array, content_set)
 
-	# Convert the second rucksack to an array
-	second_str = substr(content, compartment_item_count + 1, compartment_item_count)
-	split(second_str, second_array, "") 
-	set_from_array(second_array, second_set)
+	# Reduce the groups array based on this rucksack's shared items
+	if (NR % 3 == 1) {
+		copy_array_to(content_set, group_set)
+	} else {
+		set_intersection(group_set,  content_set, updated_group_set)
+		copy_array_to(updated_group_set, group_set)
+	}
 
-	# Determine shared items
-	set_intersection(first_set, second_set, shared_set)
+	# If this is the end of the group, add to priority
+	if (NR % 3 == 0) {
+		group_priority = 0
 
-	# Add the priority of the shared items to the running total
-	for (i in shared_set) {
-		priority += PRIORITY[shared_set[i]]
+		for (i in group_set) {
+			group_priority += PRIORITY[group_set[i]]
+		}
+
+		priority += group_priority
+
+		split("", group_set)
 	}
 }
 
@@ -112,15 +121,30 @@ function set_from_array(array, set) {
 }
 
 # Find the items that two arrays have in common
-function set_intersection(a_set, b_set, c_set) {
-	delete c_set
+function set_intersection(first_set, second_set, output_set) {
+	delete output_set
 	i = 1
-	for (x in a_set) {
-		for (y in b_set) {
-			if (a_set[x] == b_set[y]) {
-				set_concat(c_set, a_set[x])
+	for (x in first_set) {
+		for (y in second_set) {
+			if (first_set[x] == second_set[y]) {
+				set_concat(output_set, first_set[x])
 			}
 		}
+	}
+}
+
+function set_is_empty(set) {
+	if (1 in set) {
+		return FALSE
+	} else {
+		return TRUE
+	}
+}
+
+function copy_array_to(src, dst) {
+	delete dst
+	for (i in src) {
+		dst[i] = src[i]
 	}
 }
 
