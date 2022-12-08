@@ -37,10 +37,7 @@ match($0, /^move ([[:digit:]]+) from ([[:alnum:]]+) to ([[:alnum:]]+)$/, capture
 	src = capture_groups[2]
 	dst = capture_groups[3]
 
-	for (q = 1; q <= quantity; q++) {
-		element = stack_pop(src)
-		stack_push(dst, element)
-	}
+	stack_move_to(src, dst, quantity)
 }
 
 END {
@@ -110,6 +107,16 @@ function stack_pop(stack_name) {
 function stack_push(stack_name, item) {
 	next_index = length(stacks[stack_name]) + 1
 	stacks[stack_name][next_index] = item
+}
+
+function stack_move_to(src, dst, count) {
+	src_length = length(stacks[src])
+	dst_length = length(stacks[dst])
+
+	for (i = 1; i <= count; i++) {
+		stacks[dst][dst_length + i] = stacks[src][src_length + i - count]
+		delete stacks[src][src_length + i - count]
+	}
 }
 
 function stack_from_queue(queue_name, stack_name) {
