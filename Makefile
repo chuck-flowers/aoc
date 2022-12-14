@@ -1,5 +1,5 @@
 .PHONY: today
-today: day6
+today: day7
 
 .PHONY: day1
 day1:
@@ -24,3 +24,7 @@ day5:
 .PHONY: day6
 day6:
 	awk -f src/day-6.awk data/day-6.txt
+
+.PHONY: day7
+day7:
+	awk -f src/day-7.awk data/day-7.txt
